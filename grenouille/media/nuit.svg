@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Nuit sur le vallon">
+  <defs>
+    <linearGradient id="nuit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c0f14"/><stop offset=".7" stop-color="#131a21"/>
+      <stop offset="1" stop-color="#0d1213"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="800" fill="url(#nuit)"/>
+  <g fill="#e8ddc0" opacity=".5">
+    <circle cx="90" cy="150" r="1.4"/><circle cx="210" cy="90" r="1.1"/><circle cx="330" cy="190" r="1.4"/>
+    <circle cx="280" cy="300" r="1"/><circle cx="60" cy="330" r="1.1"/>
+  </g>
+  <path d="M-20 640 Q200 580 420 640 L420 800 L-20 800 Z" fill="#0a0d0c"/>
+</svg>

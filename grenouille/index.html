@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grenouille · Renderer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Public+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pierre:#16191c;        /* fond ardoise */
+    --pierre-2:#1e2226;
+    --calcaire:#ece5d6;      /* texte clair, calcaire chaud */
+    --calcaire-dim:#b9b1a0;
+    --eau:#6e9287;           /* vert-de-gris, l'eau du lavoir */
+    --cuivre:#c2873e;        /* liens */
+    --alerte:#c9705a;        /* diagnostics */
+    --voile:rgba(12,14,16,.55);
+    --display:'Cormorant Garamond', Georgia, serif;
+    --body:'Public Sans', -apple-system, 'Segoe UI', sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(120% 90% at 70% 10%, #21262b 0%, var(--pierre) 55%);
+    color:var(--calcaire);
+    font-family:var(--body);
+    font-weight:300;
+    overflow:hidden;
+  }
+
+  /* ---------- mise en page : HUD + téléphone ---------- */
+  .stage{
+    height:100vh; height:100dvh;
+    display:flex; align-items:center; justify-content:center;
+    gap:clamp(2rem,6vw,6rem);
+    padding:2rem;
+  }
+  .hud{max-width:330px}
+  .hud .eyebrow{
+    font-size:.68rem; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--eau); font-weight:500; margin-bottom:1.1rem;
+  }
+  .hud h1{
+    font-family:var(--display); font-weight:500;
+    font-size:2.1rem; line-height:1.15; margin-bottom:.9rem;
+  }
+  .hud p{font-size:.85rem; line-height:1.65; color:var(--calcaire-dim); margin-bottom:1.6rem}
+  .readout{
+    border-left:1px solid rgba(236,229,214,.18);
+    padding-left:1rem; font-size:.78rem; line-height:2;
+    color:var(--calcaire-dim); margin-bottom:1.6rem;
+  }
+  .readout b{color:var(--calcaire); font-weight:500}
+  .readout .val{color:var(--eau)}
+  .jsonbtn{
+    font-family:var(--body); font-size:.75rem; letter-spacing:.08em;
+    background:none; color:var(--calcaire);
+    border:1px solid rgba(236,229,214,.3); border-radius:2rem;
+    padding:.55rem 1.2rem; cursor:pointer; transition:border-color .2s,color .2s;
+  }
+  .jsonbtn:hover,.jsonbtn:focus-visible{border-color:var(--eau); color:var(--eau); outline:none}
+
+  /* ---------- le téléphone ---------- */
+  .phone{
+    width:min(390px,92vw);
+    height:min(800px,92vh); height:min(800px,92dvh);
+    border-radius:38px;
+    border:1px solid rgba(236,229,214,.14);
+    box-shadow:0 40px 90px rgba(0,0,0,.55), inset 0 0 0 8px #0b0d0e;
+    padding:8px; background:#0b0d0e; position:relative; flex:none;
+  }
+  .screen{
+    width:100%; height:100%; border-radius:30px; overflow-y:scroll; overflow-x:hidden;
+    background:#0d0f11; position:relative;
+    scrollbar-width:none;
+  }
+  .screen::-webkit-scrollbar{display:none}
+  .progress{
+    position:absolute; top:8px; left:8px; right:8px; height:3px; z-index:50;
+    border-radius:3px; overflow:hidden; pointer-events:none;
+  }
+  .progress i{display:block; height:100%; width:0; background:var(--eau); transition:width .1s linear}
+
+  /* ---------- scènes ---------- */
+  .scene{position:relative}
+  .scene .media{
+    position:sticky; top:0; height:var(--sh,100vh); overflow:hidden;
+    will-change:opacity;
+  }
+  .scene .media .frame{
+    position:absolute; inset:-6%;
+    will-change:transform; transform-origin:center;
+  }
+  .scene .media .frame > *{width:100%; height:100%; display:block; object-fit:cover}
+  .scene .media .grain{
+    position:absolute; inset:0; opacity:.07; pointer-events:none; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .scene .media .scrim{
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(13,15,17,.25) 0%, rgba(13,15,17,0) 35%, rgba(13,15,17,.05) 60%, rgba(13,15,17,.72) 100%);
+  }
+
+  /* média introuvable : ardoise nommée plutôt qu'un écran vide */
+  .media-absent{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    background:repeating-linear-gradient(45deg,#1a1d20 0 12px,#15181b 12px 24px);
+    color:var(--alerte); font-size:.78rem; letter-spacing:.12em; text-transform:uppercase;
+  }
+
+  .block{
+    position:absolute; left:0; right:0; z-index:10;
+    padding:0 1.6rem; max-width:100%;
+    opacity:0; transform:translateY(22px);
+    transition:opacity .7s cubic-bezier(.2,.6,.2,1), transform .7s cubic-bezier(.2,.6,.2,1);
+  }
+  .block.on{opacity:1; transform:none}
+  .block .eyebrow{
+    font-size:.62rem; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--eau); font-weight:600; margin-bottom:.7rem;
+    text-shadow:0 1px 8px rgba(0,0,0,.6);
+  }
+  .block h2{
+    font-family:var(--display); font-weight:500; font-size:2.5rem; line-height:1.05;
+    text-shadow:0 2px 24px rgba(0,0,0,.55);
+  }
+  .block h3{
+    font-family:var(--display); font-weight:500; font-size:1.7rem; line-height:1.15;
+    text-shadow:0 2px 18px rgba(0,0,0,.5);
+  }
+  .block p{
+    font-size:.92rem; line-height:1.7; font-weight:300;
+    background:var(--voile); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    border-left:2px solid var(--eau);
+    padding:.95rem 1.1rem; border-radius:0 6px 6px 0;
+  }
+  .block a{
+    display:inline-block; font-size:.82rem; font-weight:500; letter-spacing:.04em;
+    color:var(--cuivre); text-decoration:none;
+    border:1px solid rgba(194,135,62,.55); border-radius:2rem;
+    padding:.6rem 1.3rem; background:var(--voile);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  }
+  .block a::after{content:' ↗'}
+  .block .lien-refuse{
+    display:inline-block; font-size:.82rem; color:var(--calcaire-dim);
+    border:1px dashed rgba(236,229,214,.3); border-radius:2rem;
+    padding:.6rem 1.3rem; background:var(--voile);
+  }
+
+  /* scène finale */
+  .outro-inner{text-align:center; padding:0 2rem}
+  .outro-inner .mark{
+    font-family:var(--display); font-style:italic; font-weight:400;
+    font-size:1.9rem; color:var(--calcaire);
+  }
+  .outro-inner .mark i{font-style:normal; color:var(--eau)}
+  .outro-inner small{display:block; margin-top:.9rem; font-size:.72rem; letter-spacing:.12em; color:var(--calcaire-dim); text-transform:uppercase}
+
+  /* ---------- diagnostics ---------- */
+  .diagnostics{
+    position:fixed; left:1.5rem; bottom:1.5rem; z-index:90;
+    max-width:min(420px,calc(100vw - 3rem)); max-height:40vh; overflow:auto;
+    display:flex; flex-direction:column; gap:.6rem;
+  }
+  .diagnostics:empty{display:none}
+  .diag{
+    background:rgba(20,23,26,.94); backdrop-filter:blur(10px);
+    border-left:3px solid var(--alerte); border-radius:0 6px 6px 0;
+    padding:.8rem 1rem; font-size:.74rem; line-height:1.6;
+  }
+  .diag-erreur{border-left-color:var(--alerte)}
+  .diag-avertissement{border-left-color:var(--cuivre)}
+  .diag b{display:block; margin-bottom:.35rem; font-weight:500; color:var(--calcaire)}
+  .diag ul{list-style:none; color:var(--calcaire-dim)}
+  .diag li{padding-left:.9rem; position:relative}
+  .diag li::before{content:'·'; position:absolute; left:.2rem}
+
+  /* ---------- panneau JSON ---------- */
+  .jsonpanel{
+    position:fixed; inset:0; z-index:100; display:none;
+    background:rgba(10,12,13,.82); backdrop-filter:blur(10px);
+    align-items:center; justify-content:center; padding:2rem;
+  }
+  .jsonpanel.open{display:flex}
+  .jsonpanel pre{
+    max-width:680px; max-height:84vh; overflow:auto;
+    background:var(--pierre-2); border:1px solid rgba(236,229,214,.15);
+    border-radius:12px; padding:1.6rem;
+    font-size:.74rem; line-height:1.55; color:var(--calcaire-dim);
+  }
+  .jsonpanel .close{
+    position:absolute; top:1.4rem; right:1.8rem;
+    background:none; border:none; color:var(--calcaire); font-size:1.6rem; cursor:pointer;
+  }
+  .jsonpanel .k{color:var(--eau)} .jsonpanel .s{color:var(--cuivre)} .jsonpanel .n{color:var(--calcaire)}
+
+  @media (max-width:880px){
+    .stage{padding:0; gap:0}
+    .hud{display:none}
+    .phone{width:100vw; height:100vh; height:100dvh; border-radius:0; padding:0; border:none; box-shadow:none}
+    .screen{border-radius:0}
+    .progress{top:0; left:0; right:0; border-radius:0}
+    .diagnostics{left:.75rem; right:.75rem; bottom:.75rem; max-width:none}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .scene .media .frame{transform:none !important}
+    .block{transition:opacity .4s linear; transform:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <aside class="hud">
+    <div class="eyebrow">Grenouille · Renderer</div>
+    <h1>Un document, un moteur</h1>
+    <p>Tout ce qui défile à droite est produit par l'interprétation d'un unique document JSON : scènes, traitements, ancres de texte. Le back-office éditera ce document ; le moteur restera le même.</p>
+    <div class="readout">
+      POI : <b id="r-poi">—</b><br>
+      Scène <b id="r-scene">01</b> / <b id="r-total">—</b><br>
+      Traitement : <span class="val" id="r-treatment">—</span><br>
+      Média : <span class="val" id="r-media">—</span><br>
+      Thème : <span class="val" id="r-theme">—</span>
+    </div>
+    <button class="jsonbtn" id="jsonbtn">Voir le document JSON</button>
+  </aside>
+
+  <div class="phone">
+    <div class="screen" id="screen">
+      <div class="progress"><i id="bar"></i></div>
+      <!-- scènes injectées par le renderer -->
+    </div>
+  </div>
+</div>
+
+<div class="diagnostics" id="diagnostics"></div>
+
+<div class="jsonpanel" id="jsonpanel">
+  <button class="close" id="jsonclose" aria-label="Fermer">×</button>
+  <pre id="jsondump"></pre>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

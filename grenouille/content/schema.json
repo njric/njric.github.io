@@ -1,0 +1,197 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://grenouille/schemas/contenu-multimedia-1.0.json",
+  "title": "Contenu multimédia scénarisé",
+  "description": "Schéma canonique de contents.data pour le type 'multimedia'. Source de vérité unique : interprété à l'exécution par src/validate.js, et destiné à valider l'écriture côté Symfony et à générer les types TS du mobile (cf. plans/TODO.md, Phase 1, Contrat d'API).",
+  "type": "object",
+  "required": ["type", "version", "scenes"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "_comment": {
+      "type": "string",
+      "description": "Note éditoriale libre, ignorée par le moteur."
+    },
+    "type": { "const": "multimedia" },
+    "version": { "type": "string" },
+    "theme": {
+      "type": "string",
+      "description": "Nom du thème visuel appliqué par le client."
+    },
+    "poi": {
+      "type": "string",
+      "description": "Titre du POI, pour référence éditoriale."
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/scene" }
+    }
+  },
+
+  "$defs": {
+    "scene": {
+      "type": "object",
+      "required": ["id", "span", "media", "blocks"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "span": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 20,
+          "description": "Durée de la scène, en multiples de la hauteur d'écran. 1 = la scène passe sans temps mort ; 3 = le lecteur défile trois écrans sur ce média."
+        },
+        "transition": { "enum": ["none", "crossfade"] },
+        "media": { "$ref": "#/$defs/media" },
+        "blocks": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/block" }
+        }
+      }
+    },
+
+    "media": {
+      "type": "object",
+      "required": ["media_id"],
+      "additionalProperties": false,
+      "properties": {
+        "media_id": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Clé étrangère vers la table medias. La nature de l'asset (image, clip) est portée par le média, jamais par le document."
+        },
+        "loop": {
+          "type": "boolean",
+          "description": "N'a d'effet que sur un média de type clip."
+        },
+        "treatment": { "$ref": "#/$defs/treatment" }
+      }
+    },
+
+    "treatment": {
+      "description": "Comment le média est animé au fil de la progression de la scène.",
+      "oneOf": [
+        {
+          "title": "kenburns",
+          "type": "object",
+          "required": ["type", "from", "to", "zoom"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "kenburns" },
+            "from": { "$ref": "#/$defs/offset" },
+            "to": { "$ref": "#/$defs/offset" },
+            "zoom": { "type": "number", "minimum": 1, "maximum": 6 }
+          }
+        },
+        {
+          "title": "focus",
+          "type": "object",
+          "required": ["type", "point", "zoom"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "focus" },
+            "point": { "$ref": "#/$defs/point" },
+            "zoom": { "type": "number", "minimum": 1, "maximum": 6 }
+          }
+        },
+        {
+          "title": "fixed",
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": { "type": { "const": "fixed" } }
+        }
+      ]
+    },
+
+    "offset": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "number", "minimum": -50, "maximum": 50 },
+      "description": "Décalage [x, y] en pourcentage du cadre."
+    },
+
+    "point": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "number", "minimum": 0, "maximum": 100 },
+      "description": "Point d'intérêt [x, y] en pourcentage du média."
+    },
+
+    "anchor": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Position du bloc dans la progression de la scène, de 0 (entrée) à 1 (sortie). Indépendant de la résolution."
+    },
+
+    "block": {
+      "oneOf": [
+        {
+          "title": "heading",
+          "type": "object",
+          "required": ["type", "text", "anchor"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "heading" },
+            "eyebrow": {
+              "type": "string",
+              "description": "Surtitre optionnel, rendu au-dessus du titre dans le même bloc."
+            },
+            "text": { "type": "string" },
+            "level": {
+              "enum": [1, 2],
+              "description": "1 = titre de contenu, 2 = titre de section. Défaut : 2."
+            },
+            "anchor": { "$ref": "#/$defs/anchor" }
+          }
+        },
+        {
+          "title": "paragraph",
+          "type": "object",
+          "required": ["type", "text", "anchor"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "paragraph" },
+            "text": { "type": "string" },
+            "anchor": { "$ref": "#/$defs/anchor" }
+          }
+        },
+        {
+          "title": "link",
+          "type": "object",
+          "required": ["type", "text", "url", "anchor"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "link" },
+            "text": { "type": "string" },
+            "url": {
+              "type": "string",
+              "description": "Seuls les schémas http, https et mailto sont rendus ; tout autre schéma est neutralisé par le moteur."
+            },
+            "anchor": { "$ref": "#/$defs/anchor" }
+          }
+        },
+        {
+          "title": "outro",
+          "type": "object",
+          "required": ["type", "anchor"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "outro" },
+            "mark": {
+              "type": "string",
+              "description": "Signature affichée. Défaut : grenouille."
+            },
+            "text": { "type": "string", "description": "Mention d'éditeur." },
+            "anchor": { "$ref": "#/$defs/anchor" }
+          }
+        }
+      ]
+    }
+  }
+}

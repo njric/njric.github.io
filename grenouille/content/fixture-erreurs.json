@@ -1,0 +1,97 @@
+{
+  "$schema": "./schema.json",
+  "_comment": "Document volontairement fautif, pour vérifier le comportement du moteur face à un contenu mal rédigé. À ouvrir avec ?doc=content/fixture-erreurs.json — deux scènes doivent s'afficher malgré tout, et le HUD lister ce qui a été écarté.",
+  "type": "multimedia",
+  "version": "1.0",
+  "theme": "mineral",
+  "poi": "Document de test",
+  "scenes": [
+    {
+      "id": "sc_ok",
+      "span": 2,
+      "transition": "none",
+      "media": {
+        "media_id": 1,
+        "treatment": {
+          "type": "kenburns",
+          "from": [0, 0],
+          "to": [0, -3],
+          "zoom": 1.14
+        }
+      },
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 1,
+          "eyebrow": "Scène valide",
+          "text": "Celle-ci doit s'afficher",
+          "anchor": 0.05
+        },
+        {
+          "type": "paragraph",
+          "text": "Les caractères spéciaux doivent apparaître littéralement : <img src=x onerror=alert(1)> & \"guillemets\" : deux-points.",
+          "anchor": 0.5
+        }
+      ]
+    },
+    {
+      "id": "sc_bloc_fautif",
+      "span": 2,
+      "transition": "crossfade",
+      "media": {
+        "media_id": 4,
+        "treatment": { "type": "focus", "point": [50, 40], "zoom": 2 }
+      },
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Scène sauvée, blocs fautifs écartés",
+          "anchor": 0.1
+        },
+        {
+          "type": "paragraph",
+          "text": "Ancre hors bornes : ce bloc doit être écarté sans emporter la scène.",
+          "anchor": 1.4
+        },
+        {
+          "type": "citation",
+          "text": "Type de bloc inconnu : écarté lui aussi.",
+          "anchor": 0.6
+        },
+        {
+          "type": "link",
+          "text": "Lien à schéma refusé (doit être neutralisé, pas cliquable)",
+          "url": "javascript:alert(1)",
+          "anchor": 0.75
+        }
+      ]
+    },
+    {
+      "id": "sc_media_absent",
+      "span": 1.5,
+      "transition": "crossfade",
+      "media": { "media_id": 99 },
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Média inexistant : ardoise de repli attendue, pas de page blanche.",
+          "anchor": 0.3
+        }
+      ]
+    },
+    {
+      "id": "sc_span_nul",
+      "span": 0,
+      "transition": "none",
+      "media": { "media_id": 1 },
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Scène entièrement invalide : span nul.",
+          "anchor": 0.3
+        }
+      ]
+    }
+  ]
+}

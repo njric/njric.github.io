@@ -1,0 +1,34 @@
+{
+  "_comment": "Manifeste local des médias. En production cette table est servie par le backend (table medias) et media_id en est la clé étrangère. C'est ici, et non dans le document, que se déclare la nature de l'asset : le document dit QUOI montrer et COMMENT le traiter, jamais de quel type de fichier il s'agit.",
+
+  "1": {
+    "name": "facade",
+    "kind": "image",
+    "src": "media/facade.svg",
+    "alt": "Silhouette du lavoir au couchant"
+  },
+  "2": {
+    "name": "charpente",
+    "kind": "image",
+    "src": "media/charpente.svg",
+    "alt": "Charpente en chêne vue de dessous, avec la marque de charpentier en forme d'ancre"
+  },
+  "3": {
+    "name": "eau",
+    "kind": "image",
+    "src": "media/eau.svg",
+    "alt": "L'eau du bassin, ondes lentes"
+  },
+  "4": {
+    "name": "soir",
+    "kind": "image",
+    "src": "media/soir.svg",
+    "alt": "Le lavoir restauré, au soir, lanternes allumées"
+  },
+  "5": {
+    "name": "nuit",
+    "kind": "image",
+    "src": "media/nuit.svg",
+    "alt": "Nuit sur le vallon"
+  }
+}

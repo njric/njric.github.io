@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Charpente en chêne vue de dessous, avec la marque de charpentier en forme d'ancre">
+  <defs>
+    <linearGradient id="bois" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0f0d0a"/><stop offset=".5" stop-color="#241c12"/>
+      <stop offset="1" stop-color="#3a2c1a"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="800" fill="url(#bois)"/>
+  <g stroke="#5a4426" stroke-width="14" stroke-linecap="round" opacity=".95">
+    <path d="M200 60 L40 520" fill="none"/><path d="M200 60 L360 520" fill="none"/>
+    <line x1="200" y1="60" x2="200" y2="700"/>
+  </g>
+  <g stroke="#6d5430" stroke-width="9" stroke-linecap="round">
+    <path d="M118 290 Q200 250 282 290" fill="none"/>
+    <path d="M82 400 Q200 350 318 400" fill="none"/>
+    <path d="M52 505 Q200 445 348 505" fill="none"/>
+  </g>
+  <g stroke="#46351e" stroke-width="5" opacity=".8">
+    <line x1="40" y1="560" x2="360" y2="560"/><line x1="40" y1="640" x2="360" y2="640"/>
+  </g>
+  <g fill="#8a6a3c" opacity=".5">
+    <circle cx="200" cy="252" r="5"/><circle cx="200" cy="352" r="5"/><circle cx="200" cy="450" r="5"/>
+  </g>
+  <path d="M193 130 l7 -12 l7 12 m-7 -12 l0 30 m-9 -6 q9 10 18 0" stroke="#caa15f" stroke-width="3" fill="none" opacity=".75"/>
+</svg>

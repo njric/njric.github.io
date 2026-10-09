@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="L'eau du bassin, ondes lentes">
+  <defs>
+    <linearGradient id="bassin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#11181a"/><stop offset=".35" stop-color="#1d2e2c"/>
+      <stop offset=".7" stop-color="#2c4a44"/><stop offset="1" stop-color="#16211f"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .rp{animation:drift 7s ease-in-out infinite alternate}
+    .r2{animation-duration:9s}.r3{animation-duration:6s}.r4{animation-duration:11s}.r5{animation-duration:8s}
+    @keyframes drift{from{transform:translateX(0)}to{transform:translateX(-90px)}}
+    @media (prefers-reduced-motion:reduce){.rp{animation:none}}
+  </style>
+  <rect width="400" height="800" fill="url(#bassin)"/>
+  <g stroke="#6e9287" fill="none" opacity=".55">
+    <path class="rp r1" stroke-width="2.5" d="M-50 300 Q50 288 150 300 T350 300 T550 300"/>
+    <path class="rp r2" stroke-width="2"   d="M-50 380 Q50 392 150 380 T350 380 T550 380"/>
+    <path class="rp r3" stroke-width="2.5" d="M-50 470 Q50 458 150 470 T350 470 T550 470"/>
+    <path class="rp r4" stroke-width="1.5" d="M-50 560 Q50 572 150 560 T350 560 T550 560"/>
+    <path class="rp r5" stroke-width="2"   d="M-50 650 Q50 640 150 650 T350 650 T550 650"/>
+  </g>
+  <ellipse cx="200" cy="430" rx="120" ry="80" fill="#a8c5bb" opacity=".07"/>
+  <g fill="#d8c089" opacity=".22">
+    <circle cx="120" cy="345" r="2.5"/><circle cx="270" cy="510" r="2"/><circle cx="200" cy="615" r="2.5"/>
+  </g>
+</svg>

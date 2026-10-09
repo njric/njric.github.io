@@ -1,0 +1,140 @@
+{
+  "$schema": "./schema.json",
+  "type": "multimedia",
+  "version": "1.0",
+  "theme": "mineral",
+  "poi": "Le lavoir de la Brévanne",
+  "scenes": [
+    {
+      "id": "sc_01",
+      "span": 2.4,
+      "transition": "none",
+      "media": {
+        "media_id": 1,
+        "treatment": {
+          "type": "kenburns",
+          "from": [0, 0],
+          "to": [0, -3],
+          "zoom": 1.14
+        }
+      },
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 1,
+          "eyebrow": "Patrimoine de la Brévanne",
+          "text": "Le lavoir de la Brévanne",
+          "anchor": 0.04
+        },
+        {
+          "type": "paragraph",
+          "text": "Au creux du vallon, là où la source ne gèle jamais, le village a bâti en 1834 son lavoir couvert. Cent quarante ans durant, il fut la place publique des femmes de la Brévanne.",
+          "anchor": 0.5
+        }
+      ]
+    },
+    {
+      "id": "sc_02",
+      "span": 3.4,
+      "transition": "crossfade",
+      "media": {
+        "media_id": 2,
+        "treatment": { "type": "focus", "point": [50, 15], "zoom": 2.7 }
+      },
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Une charpente de batellerie",
+          "anchor": 0.08
+        },
+        {
+          "type": "paragraph",
+          "text": "Les fermes en chêne proviennent d'anciennes gabares démontées au port voisin. Approchons-nous de la panne faîtière.",
+          "anchor": 0.24
+        },
+        {
+          "type": "paragraph",
+          "text": "Là, gravée au ciseau : une marque de charpentier en forme d'ancre, signature des ateliers du port. À côté, les entailles de remploi trahissent la première vie du bois.",
+          "anchor": 0.5
+        },
+        {
+          "type": "paragraph",
+          "text": "En reculant, la logique d'ensemble apparaît : les courbes des membrures ont été conservées, et le toit du lavoir est une coque renversée.",
+          "anchor": 0.85
+        }
+      ]
+    },
+    {
+      "id": "sc_03",
+      "span": 2.4,
+      "transition": "crossfade",
+      "media": { "media_id": 3 },
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "L'eau de la source",
+          "anchor": 0.14
+        },
+        {
+          "type": "paragraph",
+          "text": "Le bassin est alimenté par gravité : la source jaillit douze mètres plus haut et traverse le mur de refend par une bouche de pierre. Le trop-plein rejoint la Brévanne, qui donne son nom au village.",
+          "anchor": 0.45
+        },
+        {
+          "type": "paragraph",
+          "text": "À 11 °C constants, été comme hiver, cette eau valut au lavoir d'être utilisé jusqu'en 1972, bien après l'arrivée des machines.",
+          "anchor": 0.78
+        }
+      ]
+    },
+    {
+      "id": "sc_04",
+      "span": 2.2,
+      "transition": "crossfade",
+      "media": {
+        "media_id": 4,
+        "treatment": {
+          "type": "kenburns",
+          "from": [0, 2],
+          "to": [0, -2],
+          "zoom": 1.1
+        }
+      },
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Sauvé par le village",
+          "anchor": 0.16
+        },
+        {
+          "type": "paragraph",
+          "text": "Promis à la démolition en 1989, le lavoir fut racheté un franc symbolique par l'association des Amis de la Brévanne, qui le restaura en chantier bénévole. Il est inscrit à l'inventaire depuis 1994.",
+          "anchor": 0.45
+        },
+        {
+          "type": "link",
+          "text": "Voir la fiche Mérimée",
+          "url": "https://www.pop.culture.gouv.fr/",
+          "anchor": 0.76
+        }
+      ]
+    },
+    {
+      "id": "sc_outro",
+      "span": 1.5,
+      "transition": "crossfade",
+      "media": { "media_id": 5, "treatment": { "type": "fixed" } },
+      "blocks": [
+        {
+          "type": "outro",
+          "mark": "grenouille",
+          "text": "Contenu publié par la commune de la Brévanne",
+          "anchor": 0.35
+        }
+      ]
+    }
+  ]
+}

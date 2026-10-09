@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Le lavoir restauré, au soir, lanternes allumées">
+  <defs>
+    <linearGradient id="soir" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#171c26"/><stop offset=".55" stop-color="#27303e"/>
+      <stop offset=".8" stop-color="#4a4030"/><stop offset="1" stop-color="#181410"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="800" fill="url(#soir)"/>
+  <g fill="#e8ddc0" opacity=".75">
+    <circle cx="70" cy="120" r="1.6"/><circle cx="150" cy="80" r="1.2"/><circle cx="320" cy="140" r="1.6"/>
+    <circle cx="250" cy="60" r="1.2"/><circle cx="360" cy="70" r="1"/><circle cx="40" cy="220" r="1.2"/>
+  </g>
+  <path d="M-20 600 L420 580 L420 800 L-20 800 Z" fill="#14110d"/>
+  <g fill="#100e0b">
+    <path d="M50 600 L200 495 L350 600 Z"/>
+    <rect x="70" y="598" width="260" height="140"/>
+  </g>
+  <path d="M50 600 L200 495 L350 600" fill="none" stroke="#33415a" stroke-width="4" opacity=".8"/>
+  <g>
+    <rect x="120" y="630" width="48" height="100" fill="#0a0908"/>
+    <rect x="232" y="630" width="48" height="100" fill="#0a0908"/>
+    <circle cx="144" cy="668" r="17" fill="#e9b35c" opacity=".85"/>
+    <circle cx="256" cy="668" r="17" fill="#e9b35c" opacity=".85"/>
+    <circle cx="144" cy="668" r="34" fill="#e9b35c" opacity=".14"/>
+    <circle cx="256" cy="668" r="34" fill="#e9b35c" opacity=".14"/>
+  </g>
+  <ellipse cx="200" cy="772" rx="200" ry="24" fill="#e9b35c" opacity=".08"/>
+</svg>

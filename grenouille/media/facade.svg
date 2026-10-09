@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Silhouette du lavoir au couchant">
+  <defs>
+    <linearGradient id="ciel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a3340"/><stop offset=".45" stop-color="#5b5a55"/>
+      <stop offset=".62" stop-color="#b07a4a"/><stop offset=".75" stop-color="#d8a05e"/>
+      <stop offset="1" stop-color="#3a3328"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="800" fill="url(#ciel)"/>
+  <circle cx="265" cy="470" r="42" fill="#f4cf8d" opacity=".9"/>
+  <ellipse cx="200" cy="640" rx="320" ry="40" fill="#23201a" opacity=".55"/>
+  <path d="M-20 560 L120 530 L260 555 L420 535 L420 800 L-20 800 Z" fill="#1d1a16"/>
+  <g fill="#15130f">
+    <path d="M60 620 L200 520 L340 620 Z"/>
+    <rect x="78" y="618" width="244" height="120"/>
+    <rect x="92" y="640" width="40" height="98" fill="#0c0b09"/>
+    <rect x="178" y="655" width="44" height="83" fill="#0c0b09"/>
+    <rect x="262" y="640" width="40" height="98" fill="#0c0b09"/>
+  </g>
+  <path d="M60 620 L200 520 L340 620" fill="none" stroke="#3c3225" stroke-width="5"/>
+  <g stroke="#2a241b" stroke-width="3" opacity=".8">
+    <line x1="120" y1="620" x2="120" y2="738"/><line x1="280" y1="620" x2="280" y2="738"/>
+  </g>
+  <ellipse cx="200" cy="770" rx="190" ry="26" fill="#caa15f" opacity=".18"/>
+</svg>
