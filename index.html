@@ -3,548 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grenouille · Renderer v0</title>
+<title>Grenouille · Renderer</title>
+<meta http-equiv="refresh" content="0; url=./grenouille/">
+<link rel="canonical" href="https://njric.github.io/grenouille/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Public+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Public+Sans:wght@300;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --pierre:#16191c;        /* fond ardoise */
-    --pierre-2:#1e2226;
-    --calcaire:#ece5d6;      /* texte clair, calcaire chaud */
+    --pierre:#16191c;
+    --calcaire:#ece5d6;
     --calcaire-dim:#b9b1a0;
-    --eau:#6e9287;           /* vert-de-gris, l'eau du lavoir */
-    --cuivre:#c2873e;        /* liens */
-    --voile:rgba(12,14,16,.55);
-    --display:'Cormorant Garamond', Georgia, serif;
-    --body:'Public Sans', -apple-system, 'Segoe UI', sans-serif;
+    --eau:#6e9287;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
   body{
     background:radial-gradient(120% 90% at 70% 10%, #21262b 0%, var(--pierre) 55%);
     color:var(--calcaire);
-    font-family:var(--body);
+    font-family:'Public Sans', -apple-system, 'Segoe UI', sans-serif;
     font-weight:300;
-    overflow:hidden;
-  }
-
-  /* ---------- mise en page : HUD + téléphone ---------- */
-  .stage{
-    height:100vh; height:100dvh;
     display:flex; align-items:center; justify-content:center;
-    gap:clamp(2rem,6vw,6rem);
     padding:2rem;
   }
-  .hud{max-width:330px}
-  .hud .eyebrow{
+  main{max-width:30rem}
+  .eyebrow{
     font-size:.68rem; letter-spacing:.28em; text-transform:uppercase;
     color:var(--eau); font-weight:500; margin-bottom:1.1rem;
   }
-  .hud h1{
-    font-family:var(--display); font-weight:500;
+  h1{
+    font-family:'Cormorant Garamond', Georgia, serif; font-weight:500;
     font-size:2.1rem; line-height:1.15; margin-bottom:.9rem;
   }
-  .hud p{font-size:.85rem; line-height:1.65; color:var(--calcaire-dim); margin-bottom:1.6rem}
-  .readout{
-    border-left:1px solid rgba(236,229,214,.18);
-    padding-left:1rem; font-size:.78rem; line-height:2;
-    color:var(--calcaire-dim); margin-bottom:1.6rem;
-  }
-  .readout b{color:var(--calcaire); font-weight:500}
-  .readout .val{color:var(--eau)}
-  .jsonbtn{
-    font-family:var(--body); font-size:.75rem; letter-spacing:.08em;
-    background:none; color:var(--calcaire);
+  p{font-size:.88rem; line-height:1.7; color:var(--calcaire-dim)}
+  code{font-family:ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--calcaire)}
+  a{
+    display:inline-block; margin-top:1.6rem;
+    font-size:.78rem; letter-spacing:.08em; color:var(--calcaire);
+    text-decoration:none;
     border:1px solid rgba(236,229,214,.3); border-radius:2rem;
-    padding:.55rem 1.2rem; cursor:pointer; transition:border-color .2s,color .2s;
+    padding:.6rem 1.3rem;
+    transition:border-color .2s, color .2s;
   }
-  .jsonbtn:hover,.jsonbtn:focus-visible{border-color:var(--eau); color:var(--eau); outline:none}
-
-  /* ---------- le téléphone ---------- */
-  .phone{
-    width:min(390px,92vw);
-    height:min(800px,92vh); height:min(800px,92dvh);
-    border-radius:38px;
-    border:1px solid rgba(236,229,214,.14);
-    box-shadow:0 40px 90px rgba(0,0,0,.55), inset 0 0 0 8px #0b0d0e;
-    padding:8px; background:#0b0d0e; position:relative; flex:none;
-  }
-  .screen{
-    width:100%; height:100%; border-radius:30px; overflow-y:scroll; overflow-x:hidden;
-    background:#0d0f11; position:relative;
-    scrollbar-width:none;
-  }
-  .screen::-webkit-scrollbar{display:none}
-  .progress{
-    position:absolute; top:8px; left:8px; right:8px; height:3px; z-index:50;
-    border-radius:3px; overflow:hidden; pointer-events:none;
-  }
-  .progress i{display:block; height:100%; width:0; background:var(--eau); transition:width .1s linear}
-
-  /* ---------- scènes ---------- */
-  .scene{position:relative}
-  .scene .media{
-    position:sticky; top:0; height:var(--sh,100vh); overflow:hidden;
-    will-change:opacity;
-  }
-  .scene .media .frame{
-    position:absolute; inset:-6%;
-    will-change:transform; transform-origin:center;
-  }
-  .scene .media svg{width:100%; height:100%; display:block}
-  .scene .media .frame img{width:100%; height:100%; object-fit:cover; display:block}
-  .scene .media .grain{
-    position:absolute; inset:0; opacity:.07; pointer-events:none; mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  .scene .media .scrim{
-    position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(13,15,17,.25) 0%, rgba(13,15,17,0) 35%, rgba(13,15,17,.05) 60%, rgba(13,15,17,.72) 100%);
-  }
-
-  .block{
-    position:absolute; left:0; right:0; z-index:10;
-    padding:0 1.6rem; max-width:100%;
-    opacity:0; transform:translateY(22px);
-    transition:opacity .7s cubic-bezier(.2,.6,.2,1), transform .7s cubic-bezier(.2,.6,.2,1);
-  }
-  .block.on{opacity:1; transform:none}
-  .block .eyebrow{
-    font-size:.62rem; letter-spacing:.3em; text-transform:uppercase;
-    color:var(--eau); font-weight:600; margin-bottom:.7rem;
-    text-shadow:0 1px 8px rgba(0,0,0,.6);
-  }
-  .block h2{
-    font-family:var(--display); font-weight:500; font-size:2.5rem; line-height:1.05;
-    text-shadow:0 2px 24px rgba(0,0,0,.55);
-  }
-  .block h3{
-    font-family:var(--display); font-weight:500; font-size:1.7rem; line-height:1.15;
-    text-shadow:0 2px 18px rgba(0,0,0,.5);
-  }
-  .block p{
-    font-size:.92rem; line-height:1.7; font-weight:300;
-    background:var(--voile); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-    border-left:2px solid var(--eau);
-    padding:.95rem 1.1rem; border-radius:0 6px 6px 0;
-  }
-  .block a{
-    display:inline-block; font-size:.82rem; font-weight:500; letter-spacing:.04em;
-    color:var(--cuivre); text-decoration:none;
-    border:1px solid rgba(194,135,62,.55); border-radius:2rem;
-    padding:.6rem 1.3rem; background:var(--voile);
-    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-  }
-  .block a::after{content:' ↗'}
-
-  /* scène finale */
-  .outro-inner{text-align:center; padding:0 2rem}
-  .outro-inner .mark{
-    font-family:var(--display); font-style:italic; font-weight:400;
-    font-size:1.9rem; color:var(--calcaire);
-  }
-  .outro-inner .mark i{font-style:normal; color:var(--eau)}
-  .outro-inner small{display:block; margin-top:.9rem; font-size:.72rem; letter-spacing:.12em; color:var(--calcaire-dim); text-transform:uppercase}
-
-  /* ---------- panneau JSON ---------- */
-  .jsonpanel{
-    position:fixed; inset:0; z-index:100; display:none;
-    background:rgba(10,12,13,.82); backdrop-filter:blur(10px);
-    align-items:center; justify-content:center; padding:2rem;
-  }
-  .jsonpanel.open{display:flex}
-  .jsonpanel pre{
-    max-width:680px; max-height:84vh; overflow:auto;
-    background:var(--pierre-2); border:1px solid rgba(236,229,214,.15);
-    border-radius:12px; padding:1.6rem;
-    font-size:.74rem; line-height:1.55; color:var(--calcaire-dim);
-  }
-  .jsonpanel .close{
-    position:absolute; top:1.4rem; right:1.8rem;
-    background:none; border:none; color:var(--calcaire); font-size:1.6rem; cursor:pointer;
-  }
-  .jsonpanel .k{color:var(--eau)} .jsonpanel .s{color:var(--cuivre)}
-
-  @media (max-width:880px){
-    .stage{padding:0; gap:0}
-    .hud{display:none}
-    .phone{width:100vw; height:100vh; height:100dvh; border-radius:0; padding:0; border:none; box-shadow:none}
-    .screen{border-radius:0}
-    .progress{top:0; left:0; right:0; border-radius:0}
-  }
-  @media (prefers-reduced-motion: reduce){
-    .scene .media .frame{transform:none !important}
-    .block{transition:opacity .4s linear; transform:none}
-  }
+  a:hover,a:focus-visible{border-color:var(--eau); color:var(--eau); outline:none}
 </style>
 </head>
 <body>
-
-<div class="stage">
-  <aside class="hud">
-    <div class="eyebrow">Grenouille · Renderer v0</div>
-    <h1>Un document, un moteur</h1>
-    <p>Tout ce qui défile à droite est produit par l'interprétation d'un unique document JSON : scènes, traitements, ancres de texte. Le back-office éditera ce document ; le moteur restera le même.</p>
-    <div class="readout">
-      Scène <b id="r-scene">01</b> / <b id="r-total">—</b><br>
-      Traitement : <span class="val" id="r-treatment">—</span><br>
-      Média : <span class="val" id="r-media">—</span><br>
-      Thème : <span class="val">mineral</span>
-    </div>
-    <button class="jsonbtn" id="jsonbtn">Voir le document JSON</button>
-  </aside>
-
-  <div class="phone">
-    <div class="screen" id="screen">
-      <div class="progress"><i id="bar"></i></div>
-      <!-- scènes injectées par le renderer -->
-    </div>
-  </div>
-</div>
-
-<div class="jsonpanel" id="jsonpanel">
-  <button class="close" id="jsonclose" aria-label="Fermer">×</button>
-  <pre id="jsondump"></pre>
-</div>
-
+<main>
+  <p class="eyebrow">Prototypes</p>
+  <h1>Grenouille · Renderer</h1>
+  <p>La démonstration vit désormais sous <code>/grenouille/</code>. Redirection en cours&nbsp;; si rien ne se passe, suis le lien.</p>
+  <a href="./grenouille/">Ouvrir la démonstration →</a>
+</main>
 <script>
-/* =========================================================
-   1. LE DOCUMENT — ce que le back-office produira un jour.
-   ========================================================= */
-const GRENOUILLE_DOC = {
-  version: "1.0",
-  theme: "mineral",
-  poi: "Le lavoir de la Brévanne",
-  scenes: [
-    {
-      id: "sc_01",
-      span: 2.4,
-      media: { kind: "image", media_id: "facade",
-               treatment: { type: "kenburns", from: [0,0], to: [0,-3], zoom: 1.14 } },
-      transition: "none",
-      blocks: [
-        { type: "eyebrow",   text: "Patrimoine de la Brévanne", anchor: 0.04 },
-        { type: "title",     text: "Le lavoir de la Brévanne",  anchor: 0.04 },
-        { type: "paragraph", text: "Au creux du vallon, là où la source ne gèle jamais, le village a bâti en 1834 son lavoir couvert. Cent quarante ans durant, il fut la place publique des femmes de la Brévanne.", anchor: 0.5 }
-      ]
-    },
-    {
-      id: "sc_02",
-      span: 3.4,
-      media: { kind: "image", media_id: "charpente",
-               treatment: { type: "focus", point: [50, 15], zoom: 2.7 } },
-      transition: "crossfade",
-      blocks: [
-        { type: "subtitle",  text: "Une charpente de batellerie", anchor: 0.08 },
-        { type: "paragraph", text: "Les fermes en chêne proviennent d'anciennes gabares démontées au port voisin. Approchons-nous de la panne faîtière.", anchor: 0.24 },
-        { type: "paragraph", text: "Là, gravée au ciseau : une marque de charpentier en forme d'ancre, signature des ateliers du port. À côté, les entailles de remploi trahissent la première vie du bois.", anchor: 0.5 },
-        { type: "paragraph", text: "En reculant, la logique d'ensemble apparaît : les courbes des membrures ont été conservées, et le toit du lavoir est une coque renversée.", anchor: 0.85 }
-      ]
-    },
-    {
-      id: "sc_03",
-      span: 2.4,
-      media: { kind: "clip", media_id: "eau", loop: true },
-      transition: "crossfade",
-      blocks: [
-        { type: "subtitle",  text: "L'eau de la source", anchor: 0.14 },
-        { type: "paragraph", text: "Le bassin est alimenté par gravité : la source jaillit douze mètres plus haut et traverse le mur de refend par une bouche de pierre. Le trop-plein rejoint la Brévanne, qui donne son nom au village.", anchor: 0.45 },
-        { type: "paragraph", text: "À 11 °C constants, été comme hiver, cette eau valut au lavoir d'être utilisé jusqu'en 1972, bien après l'arrivée des machines.", anchor: 0.78 }
-      ]
-    },
-    {
-      id: "sc_04",
-      span: 2.2,
-      media: { kind: "image", media_id: "soir",
-               treatment: { type: "kenburns", from: [0,2], to: [0,-2], zoom: 1.1 } },
-      transition: "crossfade",
-      blocks: [
-        { type: "subtitle",  text: "Sauvé par le village", anchor: 0.16 },
-        { type: "paragraph", text: "Promis à la démolition en 1989, le lavoir fut racheté un franc symbolique par l'association des Amis de la Brévanne, qui le restaura en chantier bénévole. Il est inscrit à l'inventaire depuis 1994.", anchor: 0.45 },
-        { type: "link",      text: "Voir la fiche Mérimée", url: "https://www.pop.culture.gouv.fr/", anchor: 0.76 }
-      ]
-    },
-    {
-      id: "sc_outro",
-      span: 1.5,
-      media: { kind: "image", media_id: "nuit", treatment: { type: "fixed" } },
-      transition: "crossfade",
-      blocks: [ { type: "outro", anchor: 0.35 } ]
-    }
-  ]
-};
-
-/* =========================================================
-   2. LA BIBLIOTHÈQUE DE MÉDIAS — en production : des dérivés
-      AVIF/WebP et clips MP4. Ici : des SVG évocateurs.
-   ========================================================= */
-function sky(id, stops){
-  return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">` +
-    stops.map(([o,c])=>`<stop offset="${o}" stop-color="${c}"/>`).join('') +
-    `</linearGradient></defs>`;
-}
-const MEDIA = {
-  /* la façade au couchant */
-  facade: () => `
-  <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Silhouette du lavoir au couchant">
-    ${sky('g1',[[0,'#2a3340'],[ .45,'#5b5a55'],[ .62,'#b07a4a'],[ .75,'#d8a05e'],[1,'#3a3328']])}
-    <rect width="400" height="800" fill="url(#g1)"/>
-    <circle cx="265" cy="470" r="42" fill="#f4cf8d" opacity=".9"/>
-    <ellipse cx="200" cy="640" rx="320" ry="40" fill="#23201a" opacity=".55"/>
-    <path d="M-20 560 L120 530 L260 555 L420 535 L420 800 L-20 800 Z" fill="#1d1a16"/>
-    <g fill="#15130f">
-      <path d="M60 620 L200 520 L340 620 Z"/>
-      <rect x="78" y="618" width="244" height="120"/>
-      <rect x="92" y="640" width="40" height="98" fill="#0c0b09"/>
-      <rect x="178" y="655" width="44" height="83" fill="#0c0b09"/>
-      <rect x="262" y="640" width="40" height="98" fill="#0c0b09"/>
-    </g>
-    <path d="M60 620 L200 520 L340 620" fill="none" stroke="#3c3225" stroke-width="5"/>
-    <g stroke="#2a241b" stroke-width="3" opacity=".8">
-      <line x1="120" y1="620" x2="120" y2="738"/><line x1="280" y1="620" x2="280" y2="738"/>
-    </g>
-    <ellipse cx="200" cy="770" rx="190" ry="26" fill="#caa15f" opacity=".18"/>
-  </svg>`,
-
-  /* la charpente vue de dessous */
-  charpente: () => `
-  <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Charpente en chêne vue de dessous">
-    ${sky('g2',[[0,'#0f0d0a'],[ .5,'#241c12'],[1,'#3a2c1a']])}
-    <rect width="400" height="800" fill="url(#g2)"/>
-    <g stroke="#5a4426" stroke-width="14" stroke-linecap="round" opacity=".95">
-      <path d="M200 60 L40 520" fill="none"/><path d="M200 60 L360 520" fill="none"/>
-      <line x1="200" y1="60" x2="200" y2="700"/>
-    </g>
-    <g stroke="#6d5430" stroke-width="9" stroke-linecap="round">
-      <path d="M118 290 Q200 250 282 290" fill="none"/>
-      <path d="M82 400 Q200 350 318 400" fill="none"/>
-      <path d="M52 505 Q200 445 348 505" fill="none"/>
-    </g>
-    <g stroke="#46351e" stroke-width="5" opacity=".8">
-      <line x1="40" y1="560" x2="360" y2="560"/><line x1="40" y1="640" x2="360" y2="640"/>
-    </g>
-    <g fill="#8a6a3c" opacity=".5">
-      <circle cx="200" cy="252" r="5"/><circle cx="200" cy="352" r="5"/><circle cx="200" cy="450" r="5"/>
-    </g>
-    <path d="M193 130 l7 -12 l7 12 m-7 -12 l0 30 m-9 -6 q9 10 18 0" stroke="#caa15f" stroke-width="3" fill="none" opacity=".75"/>
-  </svg>`,
-
-  /* l'eau : clip muet en boucle (ondes animées) */
-  eau: () => `
-  <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="L'eau du bassin, ondes lentes">
-    ${sky('g3',[[0,'#11181a'],[ .35,'#1d2e2c'],[ .7,'#2c4a44'],[1,'#16211f']])}
-    <rect width="400" height="800" fill="url(#g3)"/>
-    <g class="ripples" stroke="#6e9287" fill="none" opacity=".55">
-      <path class="rp r1" stroke-width="2.5" d="M-50 300 Q50 288 150 300 T350 300 T550 300"/>
-      <path class="rp r2" stroke-width="2"   d="M-50 380 Q50 392 150 380 T350 380 T550 380"/>
-      <path class="rp r3" stroke-width="2.5" d="M-50 470 Q50 458 150 470 T350 470 T550 470"/>
-      <path class="rp r4" stroke-width="1.5" d="M-50 560 Q50 572 150 560 T350 560 T550 560"/>
-      <path class="rp r5" stroke-width="2"   d="M-50 650 Q50 640 150 650 T350 650 T550 650"/>
-    </g>
-    <ellipse cx="200" cy="430" rx="120" ry="80" fill="#a8c5bb" opacity=".07"/>
-    <g fill="#d8c089" opacity=".22">
-      <circle cx="120" cy="345" r="2.5"/><circle cx="270" cy="510" r="2"/><circle cx="200" cy="615" r="2.5"/>
-    </g>
-    <style>
-      .rp{animation:drift 7s ease-in-out infinite alternate}
-      .r2{animation-duration:9s}.r3{animation-duration:6s}.r4{animation-duration:11s}.r5{animation-duration:8s}
-      @keyframes drift{from{transform:translateX(0)}to{transform:translateX(-90px)}}
-      @media (prefers-reduced-motion:reduce){.rp{animation:none}}
-    </style>
-  </svg>`,
-
-  /* le chantier au soir, lanternes */
-  soir: () => `
-  <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Le lavoir restauré, au soir">
-    ${sky('g4',[[0,'#171c26'],[ .55,'#27303e'],[ .8,'#4a4030'],[1,'#181410']])}
-    <rect width="400" height="800" fill="url(#g4)"/>
-    <g fill="#e8ddc0" opacity=".75">
-      <circle cx="70" cy="120" r="1.6"/><circle cx="150" cy="80" r="1.2"/><circle cx="320" cy="140" r="1.6"/>
-      <circle cx="250" cy="60" r="1.2"/><circle cx="360" cy="70" r="1"/><circle cx="40" cy="220" r="1.2"/>
-    </g>
-    <path d="M-20 600 L420 580 L420 800 L-20 800 Z" fill="#14110d"/>
-    <g fill="#100e0b">
-      <path d="M50 600 L200 495 L350 600 Z"/>
-      <rect x="70" y="598" width="260" height="140"/>
-    </g>
-    <path d="M50 600 L200 495 L350 600" fill="none" stroke="#33415a" stroke-width="4" opacity=".8"/>
-    <g>
-      <rect x="120" y="630" width="48" height="100" fill="#0a0908"/>
-      <rect x="232" y="630" width="48" height="100" fill="#0a0908"/>
-      <circle cx="144" cy="668" r="17" fill="#e9b35c" opacity=".85"/>
-      <circle cx="256" cy="668" r="17" fill="#e9b35c" opacity=".85"/>
-      <circle cx="144" cy="668" r="34" fill="#e9b35c" opacity=".14"/>
-      <circle cx="256" cy="668" r="34" fill="#e9b35c" opacity=".14"/>
-    </g>
-    <ellipse cx="200" cy="772" rx="200" ry="24" fill="#e9b35c" opacity=".08"/>
-  </svg>`,
-
-  /* nuit calme pour la sortie */
-  nuit: () => `
-  <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nuit sur le vallon">
-    ${sky('g5',[[0,'#0c0f14'],[ .7,'#131a21'],[1,'#0d1213']])}
-    <rect width="400" height="800" fill="url(#g5)"/>
-    <g fill="#e8ddc0" opacity=".5">
-      <circle cx="90" cy="150" r="1.4"/><circle cx="210" cy="90" r="1.1"/><circle cx="330" cy="190" r="1.4"/>
-      <circle cx="280" cy="300" r="1"/><circle cx="60" cy="330" r="1.1"/>
-    </g>
-    <path d="M-20 640 Q200 580 420 640 L420 800 L-20 800 Z" fill="#0a0d0c"/>
-  </svg>`
-};
-
-/* =========================================================
-   3. LE MOTEUR — interprète le document, et rien d'autre.
-   ========================================================= */
-const screen = document.getElementById('screen');
-const bar = document.getElementById('bar');
-const rScene = document.getElementById('r-scene');
-const rTotal = document.getElementById('r-total');
-const rTreat = document.getElementById('r-treatment');
-const rMedia = document.getElementById('r-media');
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
-
-function renderBlock(b){
-  switch(b.type){
-    case 'eyebrow':   return `<div class="eyebrow">${esc(b.text)}</div>`;
-    case 'title':     return `<h2>${esc(b.text)}</h2>`;
-    case 'subtitle':  return `<h3>${esc(b.text)}</h3>`;
-    case 'paragraph': return `<p>${esc(b.text)}</p>`;
-    case 'link':      return `<a href="${b.url}" target="_blank" rel="noopener">${esc(b.text)}</a>`;
-    case 'outro':     return `<div class="outro-inner">
-        <div class="mark">grenouille<i>.</i></div>
-        <small>Contenu publié par la commune de la Brévanne</small>
-      </div>`;
-    default: return '';
-  }
-}
-
-function build(doc){
-  rTotal.textContent = String(doc.scenes.length).padStart(2,'0');
-  doc.scenes.forEach(sc=>{
-    const sec = document.createElement('section');
-    sec.className = 'scene';
-    sec.dataset.id = sc.id;
-    sec.innerHTML = `
-      <div class="media">
-        <div class="frame">${MEDIA[sc.media.media_id]()}</div>
-        <div class="grain"></div>
-        <div class="scrim"></div>
-        ${sc.blocks.map(b=>`<div class="block" data-anchor="${b.anchor}">${renderBlock(b)}</div>`).join('')}
-      </div>`;
-    screen.appendChild(sec);
-    sec._sc = sc;
-  });
-  /* fusion eyebrow + title qui partagent la même ancre */
-  document.querySelectorAll('.scene').forEach(sec=>{
-    const blocks = [...sec.querySelectorAll('.block')];
-    for(let i=blocks.length-1;i>0;i--){
-      if(blocks[i].dataset.anchor === blocks[i-1].dataset.anchor){
-        blocks[i-1].appendChild(blocks[i].firstElementChild);
-        blocks[i].remove();
-      }
-    }
-  });
-}
-
-let scenes = [];
-function layout(){
-  const sh = screen.clientHeight;
-  document.documentElement.style.setProperty('--sh', sh+'px');
-  scenes = [...document.querySelectorAll('.scene')].map(sec=>{
-    const sc = sec._sc;
-    const h = Math.round(sh * sc.span);
-    sec.style.height = h+'px';
-    const span = h - sh;
-    sec.querySelectorAll('.block').forEach(bl=>{
-      const a = parseFloat(bl.dataset.anchor);
-      bl.style.top = Math.round(a*span + sh*0.52) + 'px';
-      if(bl.querySelector('.outro-inner')){ bl.style.top = Math.round(a*span + sh*0.42)+'px'; }
-    });
-    return { sec, sc, top: sec.offsetTop, h, span, sh,
-             media: sec.querySelector('.media'),
-             frame: sec.querySelector('.frame'),
-             blocks: [...sec.querySelectorAll('.block')] };
-  });
-}
-
-function lerp(a,b,t){return a+(b-a)*t}
-const ease = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
-
-function tick(){
-  const y = screen.scrollTop;
-  const total = screen.scrollHeight - screen.clientHeight;
-  bar.style.width = (total? (y/total*100):0)+'%';
-
-  let active = scenes[0];
-  scenes.forEach((s,i)=>{
-    const p = s.span>0 ? Math.min(1, Math.max(0,(y - s.top)/s.span)) : 1;
-    if(y >= s.top - s.sh*0.5) active = s;
-
-    /* traitement du média */
-    const tr = s.sc.media.treatment;
-    if(tr && !reduced){
-      if(tr.type==='kenburns'){
-        const e = ease(p);
-        const tx = lerp(tr.from[0], tr.to[0], e);
-        const ty = lerp(tr.from[1], tr.to[1], e);
-        const z  = lerp(1.04, tr.zoom, e);
-        s.frame.style.transform = `translate(${tx}%,${ty}%) scale(${z})`;
-      } else if(tr.type==='focus'){
-        /* zoom in puis zoom out : cloche avec plateau au sommet,
-           pour laisser le temps de lire au point focal */
-        const bell = Math.min(1, Math.sin(Math.PI * p) * 1.4);
-        const z = lerp(1.03, tr.zoom, ease(bell));
-        s.frame.style.transformOrigin = `${tr.point[0]}% ${tr.point[1]}%`;
-        s.frame.style.transform = `scale(${z})`;
-      }
-    }
-
-    /* transitions : fondu au noir minéral entre scènes */
-    let op = 1;
-    if(s.sc.transition==='crossfade') op = Math.min(op, Math.min(1, p/0.12 + (y>=s.top?0:1)*0 + (s.top===0?1:0) ) || 1);
-    if(s.sc.transition==='crossfade' && y < s.top && y > s.top - s.sh){
-      op = Math.min(op, Math.max(0, 1-(s.top - y)/(s.sh*0.55)) );
-    }
-    if(i < scenes.length-1 && p > 0.97){
-      /* l'entrée de la suivante gère le fondu : rien à faire ici */
-    }
-    s.media.style.opacity = (s.sc.transition==='crossfade') ? op : 1;
-
-    /* révélation des blocs aux ancres */
-    s.blocks.forEach(bl=>{
-      const a = parseFloat(bl.dataset.anchor);
-      bl.classList.toggle('on', p >= a - 0.04 || (y > s.top + s.h));
-    });
-
-    if(s===active){
-      rScene.textContent = String(i+1).padStart(2,'0');
-      rTreat.textContent = tr ? tr.type : '—';
-      rMedia.textContent = s.sc.media.kind + (s.sc.media.loop?' · loop':'');
-    }
-  });
-  requestAnimationFrame(tick);
-}
-
-/* panneau JSON */
-const panel = document.getElementById('jsonpanel');
-document.getElementById('jsonbtn').addEventListener('click', ()=>{
-  const dump = JSON.stringify(GRENOUILLE_DOC, null, 2)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/"([^"]+)":/g,'<span class="k">"$1"</span>:')
-    .replace(/: "(.*?)"/g,': <span class="s">"$1"</span>');
-  document.getElementById('jsondump').innerHTML = dump;
-  panel.classList.add('open');
-});
-document.getElementById('jsonclose').addEventListener('click', ()=>panel.classList.remove('open'));
-panel.addEventListener('click', e=>{ if(e.target===panel) panel.classList.remove('open'); });
-
-build(GRENOUILLE_DOC);
-layout();
-addEventListener('resize', layout);
-requestAnimationFrame(tick);
+  /* replace() plutôt que assign() : la redirection ne laisse pas d'entrée dans
+     l'historique, le bouton Retour ramène donc à la page précédente, pas ici. */
+  location.replace('./grenouille/');
 </script>
 </body>
 </html>
