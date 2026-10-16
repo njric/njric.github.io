@@ -39,6 +39,17 @@ export function trier(doc, schema) {
   const scenes = [];
   const rejets = [];
 
+  // Contrôle de la racine : type, version, champs inconnus. Les scènes sont
+  // neutralisées ici parce qu'elles sont jugées une à une plus bas — sans quoi
+  // une seule scène fautive condamnerait tout le document.
+  // Sans ce passage, une faute en tête (un champ mal orthographié, par exemple)
+  // ne se voyait pas dans le navigateur et n'apparaissait qu'en intégration.
+  const racine = {
+    ...schema,
+    properties: { ...schema.properties, scenes: { type: "array" } },
+  };
+  rejets.push(...validate(doc, racine, schema, "document"));
+
   doc.scenes.forEach((scene, i) => {
     const chemin = `scenes[${i}]`;
     const erreurs = validate(scene, REF_SCENE, schema, chemin);
