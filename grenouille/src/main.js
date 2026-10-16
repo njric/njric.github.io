@@ -13,8 +13,9 @@ import { loadManifest, auditDocumentMedia } from "./media.js";
 import { render } from "./render.js";
 import { createEngine } from "./engine.js";
 
-const DOC_PAR_DEFAUT = "content/lavoir-brevanne.json";
-const SCHEMA = "content/schema.json";
+const DOSSIER = "content/";
+const CATALOGUE = `${DOSSIER}index.json`;
+const SCHEMA = `${DOSSIER}schema.json`;
 const MANIFESTE = "media/index.json";
 
 const $ = (id) => document.getElementById(id);
@@ -116,20 +117,65 @@ async function charger(url, quoi) {
   return reponse.json();
 }
 
+/**
+ * Remplit le sélecteur de document du HUD.
+ *
+ * Un site statique ne sait pas lister un dossier : le catalogue est donc une
+ * donnée comme une autre, content/index.json. C'est ce que l'API servira un
+ * jour — les POI d'une institution — et la mécanique ne changera pas.
+ */
+function brancherSelecteur(catalogue, docUrl) {
+  const select = $("r-doc");
+
+  for (const { fichier, titre } of catalogue.documents) {
+    const option = document.createElement("option");
+    option.value = DOSSIER + fichier;
+    option.textContent = titre;
+    select.appendChild(option);
+  }
+
+  // Un brouillon ou le document d'essai ne figurent pas au catalogue : plutôt
+  // que de les faire disparaître du sélecteur, on les y ajoute le temps de la
+  // visite, pour que le rédacteur voie ce qu'il est en train de regarder.
+  if (!catalogue.documents.some((d) => DOSSIER + d.fichier === docUrl)) {
+    const option = document.createElement("option");
+    option.value = docUrl;
+    option.textContent = `hors catalogue · ${docUrl.replace(DOSSIER, "")}`;
+    select.appendChild(option);
+  }
+
+  select.value = docUrl;
+  // Rechargement plutôt que remplacement à chaud : l'URL devient partageable,
+  // et le moteur repart d'une page propre sans démontage à orchestrer.
+  select.addEventListener("change", () => {
+    location.search = `?doc=${select.value}`;
+  });
+}
+
 async function demarrer() {
   const params = new URLSearchParams(location.search);
-  const docUrl = params.get("doc") || DOC_PAR_DEFAUT;
 
-  let doc;
+  let catalogue;
   let schema;
   let manifeste;
   try {
-    [doc, schema, manifeste] = await Promise.all([
-      charger(docUrl, "document"),
+    [catalogue, schema, manifeste] = await Promise.all([
+      charger(CATALOGUE, "catalogue"),
       charger(SCHEMA, "schéma"),
       loadManifest(MANIFESTE),
     ]);
     assertSupported(schema);
+  } catch (erreur) {
+    signaler([erreur.message], "erreur");
+    return;
+  }
+
+  const docUrl = params.get("doc") || DOSSIER + catalogue.defaut;
+  brancherSelecteur(catalogue, docUrl);
+
+  let doc;
+  try {
+    doc = await charger(docUrl, "document");
   } catch (erreur) {
     signaler([erreur.message], "erreur");
     return;

@@ -47,6 +47,20 @@
     font-size:2.1rem; line-height:1.15; margin-bottom:.9rem;
   }
   .hud p{font-size:.85rem; line-height:1.65; color:var(--calcaire-dim); margin-bottom:1.6rem}
+  .docpick{display:block; margin-bottom:1.4rem}
+  .docpick span{
+    display:block; margin-bottom:.45rem;
+    font-size:.62rem; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--eau); font-weight:500;
+  }
+  .docpick select{
+    width:100%; font-family:var(--body); font-size:.82rem; font-weight:300;
+    color:var(--calcaire); background:var(--pierre-2);
+    border:1px solid rgba(236,229,214,.22); border-radius:6px;
+    padding:.5rem .7rem; cursor:pointer;
+    transition:border-color .2s;
+  }
+  .docpick select:hover,.docpick select:focus-visible{border-color:var(--eau); outline:none}
   .readout{
     border-left:1px solid rgba(236,229,214,.18);
     padding-left:1rem; font-size:.78rem; line-height:2;
@@ -219,6 +233,10 @@
     <div class="eyebrow">Grenouille · Renderer</div>
     <h1>Un document, un moteur</h1>
     <p>Tout ce qui défile à droite est produit par l'interprétation d'un unique document JSON : scènes, traitements, ancres de texte. Le back-office éditera ce document ; le moteur restera le même.</p>
+    <label class="docpick">
+      <span>Document</span>
+      <select id="r-doc"></select>
+    </label>
     <div class="readout">
       POI : <b id="r-poi">—</b><br>
       Scène <b id="r-scene">01</b> / <b id="r-total">—</b><br>

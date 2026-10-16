@@ -1,0 +1,8 @@
+{
+  "_comment": "Catalogue des documents publiés. Un site statique ne sait pas lister un dossier : cette liste doit donc être tenue à la main. Un test la compare au contenu réel de content/ et échoue en nommant ce qui manque, et un autre vérifie que chaque titre correspond au champ \"poi\" du document. En production, c'est l'API qui servira cette liste — les POI d'une institution.",
+
+  "defaut": "lavoir-brevanne.json",
+  "documents": [
+    { "fichier": "lavoir-brevanne.json", "titre": "Le lavoir de la Brévanne" }
+  ]
+}
